@@ -6,6 +6,7 @@ class User {
 private:
     std::string username;
     std::string password;
+    char* hash;
     bool loggedIn = false;
 
 public:
@@ -20,6 +21,10 @@ public:
     const std::string &getPassword() const;
 
     void setPassword(const std::string &password);
+
+    char *getHash() const;
+
+    void setHash(char *hash);
 
     bool isLoggedIn() const;
 

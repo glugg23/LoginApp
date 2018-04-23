@@ -2,9 +2,16 @@
 #include <fstream>
 #include <sstream>
 
+#include <sodium.h>
+
 #include "user.h"
 
 int main() {
+    if (sodium_init() == -1) {
+        std::cerr << "ERROR: Encryption library could not be initialized" << std::endl;
+        return 1;
+    }
+
     std::string username, password;
     User user;
 
@@ -17,8 +24,18 @@ int main() {
         std::cout << "Enter your password: ";
         std::cin >> password;
 
+        char hashed_password[crypto_pwhash_STRBYTES];
+
+        if (crypto_pwhash_str
+                (hashed_password, password.c_str(), password.length(),
+                 crypto_pwhash_OPSLIMIT_SENSITIVE, crypto_pwhash_MEMLIMIT_SENSITIVE) != 0) {
+            std::cerr << "ERROR: Out of memory for hash" << std::endl;
+            return 1;
+        }
+
         user.setUsername(username);
         user.setPassword(password);
+        user.setHash(hashed_password);
 
         //Read file line by line
         for(std::string line; std::getline(inputFile, line);) {

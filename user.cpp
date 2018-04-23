@@ -18,6 +18,14 @@ void User::setPassword(const std::string &password) {
     User::password = password;
 }
 
+char* User::getHash() const {
+    return hash;
+}
+
+void User::setHash(char *hash) {
+    User::hash = hash;
+}
+
 bool User::isLoggedIn() const {
     return loggedIn;
 }
