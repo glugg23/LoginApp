@@ -1,0 +1,4 @@
+debug debug
+admin password
+user1 pw1
+user2 pw2
