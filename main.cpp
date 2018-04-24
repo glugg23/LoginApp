@@ -13,6 +13,7 @@
 #include <mongocxx/stdx.hpp>
 #include <bsoncxx/builder/stream/document.hpp>
 
+#include "PRIVATE.h"
 #include "user.h"
 
 using bsoncxx::builder::stream::close_array;
@@ -24,7 +25,7 @@ using bsoncxx::builder::stream::open_document;
 using bsoncxx::builder::basic::kvp;
 
 mongocxx::instance instance{};
-mongocxx::client client{mongocxx::uri{"mongodb://ds251727.mlab.com:51727/"}};
+mongocxx::client client{mongocxx::uri{DATABASE_LOGIN_ADMIN}};
 mongocxx::database db = client["users_test"];
 mongocxx::collection coll = db["users"];
 
@@ -39,13 +40,12 @@ int main() {
     inputFile.open("users.txt", std::ios::in | std::ios::out);
 
     //Test to see how document creation works
-    bsoncxx::builder::basic::document basic_builder{};
+    /*bsoncxx::builder::basic::document basic_builder{};
     basic_builder.append(kvp("user", "test"));
     basic_builder.append(kvp("password", "123"));
     bsoncxx::document::value document = basic_builder.extract();
     bsoncxx::document::view view = document.view();
-
-    bsoncxx::stdx::optional<mongocxx::result::insert_one> result = coll.insert_one(view);
+    bsoncxx::stdx::optional<mongocxx::result::insert_one> result = coll.insert_one(view);*/
 
     do {
         std::string username, password;
