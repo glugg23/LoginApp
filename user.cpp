@@ -16,8 +16,8 @@ std::string User::getPassword() const {
     return password;
 }
 
-void User::setPassword(std::string password) {
-    User::password = std::move(password);
+void User::setPassword(const std::string &password) {
+    User::password = password;
 }
 
 bool User::isLoggedIn() const {
@@ -29,6 +29,7 @@ void User::toggleLoggedIn() {
 }
 
 bool User::verifyUser(const User &userFromFile) {
+    //Only run slow function if usernames match
     if(username == userFromFile.getUsername()) {
         return crypto_pwhash_str_verify(userFromFile.getPassword().c_str(),
                password.c_str(), password.length()) == 0;

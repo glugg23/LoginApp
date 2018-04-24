@@ -12,13 +12,12 @@ int main() {
         return 1;
     }
 
-    std::string username, password;
     User user;
-
     std::fstream inputFile;
     inputFile.open("users.txt", std::ios::in | std::ios::out);
 
     do {
+        std::string username, password;
         std::cout << "Enter your username: ";
         std::cin >> username;
         std::cout << "Enter your password: ";

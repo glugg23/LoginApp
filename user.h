@@ -19,7 +19,7 @@ public:
 
     std::string getPassword() const;
 
-    void setPassword(std::string password);
+    void setPassword(const std::string &password);
 
     bool isLoggedIn() const;
 
