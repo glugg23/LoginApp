@@ -1,20 +1,50 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <cstdint>
+#include <vector>
 
 #include <sodium.h>
 
+#include <bsoncxx/json.hpp>
+#include <mongocxx/client.hpp>
+#include <mongocxx/instance.hpp>
+#include <mongocxx/uri.hpp>
+#include <mongocxx/stdx.hpp>
+#include <bsoncxx/builder/stream/document.hpp>
+
+#include "PRIVATE.h"
 #include "user.h"
 
+using bsoncxx::builder::stream::close_array;
+using bsoncxx::builder::stream::close_document;
+using bsoncxx::builder::stream::document;
+using bsoncxx::builder::stream::finalize;
+using bsoncxx::builder::stream::open_array;
+using bsoncxx::builder::stream::open_document;
+using bsoncxx::builder::basic::kvp;
+using bsoncxx::builder::basic::make_document;
+
 int main() {
+    mongocxx::instance instance{};
+    mongocxx::client client{mongocxx::uri{DATABASE_LOGIN_ADMIN}};
+    mongocxx::database db = client["users_test"];
+    mongocxx::collection collection = db["users"];
+
     if (sodium_init() == -1) {
         std::cerr << "ERROR: Encryption library could not be initialized" << std::endl;
         return 1;
     }
 
     User user;
-    std::fstream inputFile;
-    inputFile.open("users.txt", std::ios::in | std::ios::out);
+
+    //Test to see how document creation works
+    /*bsoncxx::builder::basic::document basic_builder{};
+    basic_builder.append(kvp("user", "test"));
+    basic_builder.append(kvp("password", "123"));
+    bsoncxx::document::value document = basic_builder.extract();
+    bsoncxx::document::view view = document.view();
+    bsoncxx::stdx::optional<mongocxx::result::insert_one> result = coll.insert_one(view);*/
 
     do {
         std::string username, password;
@@ -36,39 +66,40 @@ int main() {
         //Print hash for debugging reasons
         std::cout << hashed_password << std::endl;*/
 
-        user.setUsername(username);
-        user.setPassword(password);
+        //Set values of user
+        user(username, password);
 
-        //Read file line by line
-        for(std::string line; std::getline(inputFile, line);) {
-            std::istringstream iss(line);
-            std::string fileUsername, filePassword;
+        //Clear data now that user object has stored it
+        username.clear();
+        password.clear();
 
-            //Splits string and breaks in case it doesn't work
-            if(!(iss >> fileUsername >> filePassword)) {
-                break;
-            }
+        //Find if document matching username exists
+        core::optional<bsoncxx::document::value> maybe_doc
+            = collection.find_one(make_document(kvp("user", user.getUsername())));
 
-            //If the username and password match, login user and end loop
-            if(user.verifyUser(User(fileUsername, filePassword))) {
+        if(maybe_doc) {
+            //View document
+            bsoncxx::document::view view = maybe_doc->view();
+            //Get element in password row
+            bsoncxx::document::element element = view["password"];
+
+            //Check whether the hash matches the given password
+            if(crypto_pwhash_str_verify(element.get_utf8().value.to_string().c_str(),
+                 user.getPassword().c_str(), user.getPassword().length()) == 0) {
                 user.toggleLoggedIn();
                 std::cout << "You have successfully logged in" << std::endl;
-                break;
+
+            } else {
+                std::cout << "Wrong password" << std::endl;
+                //Maybe add option here to change password?
             }
-        }
 
-        //If the user failed to login
-        if(!user.isLoggedIn()) {
-            std::cout << "Wrong username or password." << std::endl;
-
-            //Reset file and seek to beginning
-            inputFile.clear();
-            inputFile.seekg(0, std::ios::beg);
+        } else {
+            std::cout << "Wrong username" << std::endl;
+            //Maybe add option here to create new user?
         }
 
     } while(!user.isLoggedIn());
-
-    inputFile.close();
 
     return 0;
 }
