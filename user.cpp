@@ -28,13 +28,7 @@ void User::toggleLoggedIn() {
     User::loggedIn = !User::loggedIn;
 }
 
-bool User::verifyUser(const User &userFromFile) {
-    //Only run slow function if usernames match
-    if(username == userFromFile.getUsername()) {
-        return crypto_pwhash_str_verify(userFromFile.getPassword().c_str(),
-               password.c_str(), password.length()) == 0;
-
-    } else {
-        return false;
-    }
+void User::operator()(const std::string &username, const std::string &password) {
+    this->username = username;
+    this->password = password;
 }

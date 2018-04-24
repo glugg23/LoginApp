@@ -25,5 +25,5 @@ public:
 
     void toggleLoggedIn();
 
-    bool verifyUser(const User &userFromFile);
+    void operator()(const std::string &username, const std::string &password);
 };

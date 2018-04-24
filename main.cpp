@@ -37,8 +37,6 @@ int main() {
     }
 
     User user;
-    std::fstream inputFile;
-    inputFile.open("users.txt", std::ios::in | std::ios::out);
 
     //Test to see how document creation works
     /*bsoncxx::builder::basic::document basic_builder{};
@@ -68,52 +66,40 @@ int main() {
         //Print hash for debugging reasons
         std::cout << hashed_password << std::endl;*/
 
-        user.setUsername(username);
-        user.setPassword(password);
+        //Set values of user
+        user(username, password);
 
-        core::optional<bsoncxx::document::value> maybe_doc = collection.find_one(make_document(kvp("user", username)));
+        //Clear data now that user object has stored it
+        username.clear();
+        password.clear();
+
+        //Find if document matching username exists
+        core::optional<bsoncxx::document::value> maybe_doc
+            = collection.find_one(make_document(kvp("user", user.getUsername())));
 
         if(maybe_doc) {
+            //View document
             bsoncxx::document::view view = maybe_doc->view();
+            //Get element in password row
             bsoncxx::document::element element = view["password"];
 
+            //Check whether the hash matches the given password
             if(crypto_pwhash_str_verify(element.get_utf8().value.to_string().c_str(),
-                 password.c_str(), password.length()) == 0) {
+                 user.getPassword().c_str(), user.getPassword().length()) == 0) {
                 user.toggleLoggedIn();
                 std::cout << "You have successfully logged in" << std::endl;
-            }
-        }
 
-        //Read file line by line
-        /*for(std::string line; std::getline(inputFile, line);) {
-            std::istringstream iss(line);
-            std::string fileUsername, filePassword;
-
-            //Splits string and breaks in case it doesn't work
-            if(!(iss >> fileUsername >> filePassword)) {
-                break;
+            } else {
+                std::cout << "Wrong password" << std::endl;
+                //Maybe add option here to change password?
             }
 
-            //If the username and password match, login user and end loop
-            if(user.verifyUser(User(fileUsername, filePassword))) {
-                user.toggleLoggedIn();
-                std::cout << "You have successfully logged in" << std::endl;
-                break;
-            }
-        }*/
-
-        //If the user failed to login
-        if(!user.isLoggedIn()) {
-            std::cout << "Wrong username or password." << std::endl;
-
-            //Reset file and seek to beginning
-            /*inputFile.clear();
-            inputFile.seekg(0, std::ios::beg);*/
+        } else {
+            std::cout << "Wrong username" << std::endl;
+            //Maybe add option here to create new user?
         }
 
     } while(!user.isLoggedIn());
-
-    inputFile.close();
 
     return 0;
 }
