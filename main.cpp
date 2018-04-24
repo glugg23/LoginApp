@@ -2,20 +2,39 @@
 #include <fstream>
 #include <sstream>
 
+#include <sodium.h>
+
 #include "user.h"
 
 int main() {
-    std::string username, password;
-    User user;
+    if (sodium_init() == -1) {
+        std::cerr << "ERROR: Encryption library could not be initialized" << std::endl;
+        return 1;
+    }
 
+    User user;
     std::fstream inputFile;
     inputFile.open("users.txt", std::ios::in | std::ios::out);
 
     do {
+        std::string username, password;
         std::cout << "Enter your username: ";
         std::cin >> username;
         std::cout << "Enter your password: ";
         std::cin >> password;
+
+        //Commented out way of how to hash password, to use at later date
+        /*char hashed_password[crypto_pwhash_STRBYTES];
+
+        if (crypto_pwhash_str
+                (hashed_password, password.c_str(), password.length(),
+                 crypto_pwhash_OPSLIMIT_SENSITIVE, crypto_pwhash_MEMLIMIT_SENSITIVE) != 0) {
+            std::cerr << "ERROR: Out of memory for hash" << std::endl;
+            return 1;
+        }
+
+        //Print hash for debugging reasons
+        std::cout << hashed_password << std::endl;*/
 
         user.setUsername(username);
         user.setPassword(password);
@@ -31,8 +50,9 @@ int main() {
             }
 
             //If the username and password match, login user and end loop
-            if(user.getUsername() == fileUsername && user.getPassword() == filePassword) {
+            if(user.verifyUser(User(fileUsername, filePassword))) {
                 user.toggleLoggedIn();
+                std::cout << "You have successfully logged in" << std::endl;
                 break;
             }
         }

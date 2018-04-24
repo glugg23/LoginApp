@@ -17,7 +17,7 @@ public:
 
     void setUsername(const std::string &username);
 
-    const std::string &getPassword() const;
+    std::string getPassword() const;
 
     void setPassword(const std::string &password);
 
@@ -25,7 +25,5 @@ public:
 
     void toggleLoggedIn();
 
-    bool operator==(const User &rhs) const;
-
-    bool operator!=(const User &rhs) const;
+    bool verifyUser(const User &userFromFile);
 };
