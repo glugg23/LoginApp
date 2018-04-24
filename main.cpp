@@ -1,10 +1,28 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <cstdint>
+#include <vector>
 
 #include <sodium.h>
 
+#include <bsoncxx/json.hpp>
+#include <mongocxx/client.hpp>
+#include <mongocxx/instance.hpp>
+#include <mongocxx/uri.hpp>
+#include <mongocxx/stdx.hpp>
+#include <bsoncxx/builder/stream/document.hpp>
+
 #include "user.h"
+
+using bsoncxx::builder::stream::close_array;
+using bsoncxx::builder::stream::close_document;
+using bsoncxx::builder::stream::document;
+using bsoncxx::builder::stream::finalize;
+using bsoncxx::builder::stream::open_array;
+using bsoncxx::builder::stream::open_document;
+
+mongocxx::instance instance{};
 
 int main() {
     if (sodium_init() == -1) {
