@@ -1,4 +1,0 @@
-debug $argon2id$v=19$m=1048576,t=4,p=1$7szCKVot1gDKxy/nwyUzBg$Bql8nu5TKzjcJ90rBE/tpsZ+iJDj3RiFRgS5jmFX5MY
-admin $argon2id$v=19$m=1048576,t=4,p=1$eAVicp64Z5lEXOn+BZbPLw$uNpgKs8zgjms9OpgDUee2EWtIVmKdzCE/feOiM6iFUM
-user1 $argon2id$v=19$m=1048576,t=4,p=1$LTXcMIc0DoNtIPYjhbLctQ$tTkZWU78dYYBpXJjW9CHgHloIi8CThrXpPUyLZLGBmc
-user2 $argon2id$v=19$m=1048576,t=4,p=1$5zmmcTOm3Y6NpH6NZ/dX3g$JHK9OSCA8WwXF3chOtLXYFxB7zn/cR8KrqpzfPygY8E
