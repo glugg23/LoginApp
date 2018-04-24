@@ -23,13 +23,14 @@ using bsoncxx::builder::stream::finalize;
 using bsoncxx::builder::stream::open_array;
 using bsoncxx::builder::stream::open_document;
 using bsoncxx::builder::basic::kvp;
-
-mongocxx::instance instance{};
-mongocxx::client client{mongocxx::uri{DATABASE_LOGIN_ADMIN}};
-mongocxx::database db = client["users_test"];
-mongocxx::collection coll = db["users"];
+using bsoncxx::builder::basic::make_document;
 
 int main() {
+    mongocxx::instance instance{};
+    mongocxx::client client{mongocxx::uri{DATABASE_LOGIN_ADMIN}};
+    mongocxx::database db = client["users_test"];
+    mongocxx::collection collection = db["users"];
+
     if (sodium_init() == -1) {
         std::cerr << "ERROR: Encryption library could not be initialized" << std::endl;
         return 1;
@@ -70,8 +71,21 @@ int main() {
         user.setUsername(username);
         user.setPassword(password);
 
+        core::optional<bsoncxx::document::value> maybe_doc = collection.find_one(make_document(kvp("user", username)));
+
+        if(maybe_doc) {
+            bsoncxx::document::view view = maybe_doc->view();
+            bsoncxx::document::element element = view["password"];
+
+            if(crypto_pwhash_str_verify(element.get_utf8().value.to_string().c_str(),
+                 password.c_str(), password.length()) == 0) {
+                user.toggleLoggedIn();
+                std::cout << "You have successfully logged in" << std::endl;
+            }
+        }
+
         //Read file line by line
-        for(std::string line; std::getline(inputFile, line);) {
+        /*for(std::string line; std::getline(inputFile, line);) {
             std::istringstream iss(line);
             std::string fileUsername, filePassword;
 
@@ -86,15 +100,15 @@ int main() {
                 std::cout << "You have successfully logged in" << std::endl;
                 break;
             }
-        }
+        }*/
 
         //If the user failed to login
         if(!user.isLoggedIn()) {
             std::cout << "Wrong username or password." << std::endl;
 
             //Reset file and seek to beginning
-            inputFile.clear();
-            inputFile.seekg(0, std::ios::beg);
+            /*inputFile.clear();
+            inputFile.seekg(0, std::ios::beg);*/
         }
 
     } while(!user.isLoggedIn());
