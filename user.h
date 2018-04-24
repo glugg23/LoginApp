@@ -5,32 +5,25 @@
 class User {
 private:
     std::string username;
-    std::string password;
-    char* hash;
+    char *password = nullptr;
     bool loggedIn = false;
 
 public:
     User() = default;
 
-    User(const std::string &username, const std::string &password);
+    User(const std::string &username, char *password);
 
     const std::string &getUsername() const;
 
     void setUsername(const std::string &username);
 
-    const std::string &getPassword() const;
+    char* getPassword() const;
 
-    void setPassword(const std::string &password);
-
-    char *getHash() const;
-
-    void setHash(char *hash);
+    void setPassword(char *password);
 
     bool isLoggedIn() const;
 
     void toggleLoggedIn();
 
-    bool operator==(const User &rhs) const;
-
-    bool operator!=(const User &rhs) const;
+    bool verifyUser(const User &userFromFile);
 };

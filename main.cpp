@@ -34,8 +34,7 @@ int main() {
         }
 
         user.setUsername(username);
-        user.setPassword(password);
-        user.setHash(hashed_password);
+        user.setPassword(hashed_password);
 
         //Read file line by line
         for(std::string line; std::getline(inputFile, line);) {
@@ -48,7 +47,7 @@ int main() {
             }
 
             //If the username and password match, login user and end loop
-            if(user.getUsername() == fileUsername && user.getPassword() == filePassword) {
+            if(user.verifyUser(User(fileUsername, const_cast<char*>(filePassword.c_str())))) {
                 user.toggleLoggedIn();
                 break;
             }

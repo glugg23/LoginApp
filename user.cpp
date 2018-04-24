@@ -1,6 +1,8 @@
 #include "user.h"
 
-User::User(const std::string &username, const std::string &password) : username(username), password(password) {}
+#include <sodium.h>
+
+User::User(const std::string &username, char *password) : username(username), password(password) {}
 
 const std::string &User::getUsername() const {
     return username;
@@ -10,20 +12,12 @@ void User::setUsername(const std::string &username) {
     User::username = username;
 }
 
-const std::string &User::getPassword() const {
+char *User::getPassword() const {
     return password;
 }
 
-void User::setPassword(const std::string &password) {
+void User::setPassword(char *password) {
     User::password = password;
-}
-
-char* User::getHash() const {
-    return hash;
-}
-
-void User::setHash(char *hash) {
-    User::hash = hash;
 }
 
 bool User::isLoggedIn() const {
@@ -34,12 +28,16 @@ void User::toggleLoggedIn() {
     User::loggedIn = !User::loggedIn;
 }
 
+bool User::verifyUser(const User &userFromFile) {
+    if(username == userFromFile.getUsername()) {
+        if((crypto_pwhash_str_verify(password, userFromFile.getPassword(), strlen(userFromFile.getPassword()))) == 0) {
+            return true;
 
-bool User::operator==(const User &rhs) const {
-    return username == rhs.username &&
-           password == rhs.password;
-}
+        } else {
+            return false;
+        }
 
-bool User::operator!=(const User &rhs) const {
-    return !(rhs == *this);
+    } else {
+        return false;
+    }
 }
