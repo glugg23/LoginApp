@@ -1,4 +1,4 @@
-debug 1$ICMSiRJ8E3jkx6gkTKs6XA$/ttLE2k5qyt3ScwgAotUBXKqU2B0Z2JN018dU8iKhis
-admin 1$/S0P3GREXbLFpavNrEuduA$n1LBivQ4iZZPaA4J0kUlyd+X+pI4ZBOuh5JaU89aIOc
-user1 1$Al6ucXVv6/BMqfDlmcEs7g$2xAHdtH7oDr9pbZenPQ1ftyE3lmtZ/y8ej+Yn0F8kHw
-user2 1$6rDPSPJEWLXotAdu2uZUBQ$+ugxRtMST19UYPyo/S/XgitJL6vwWhaX6XlNjBaRek8
+debug $argon2id$v=19$m=1048576,t=4,p=1$7szCKVot1gDKxy/nwyUzBg$Bql8nu5TKzjcJ90rBE/tpsZ+iJDj3RiFRgS5jmFX5MY
+admin $argon2id$v=19$m=1048576,t=4,p=1$eAVicp64Z5lEXOn+BZbPLw$uNpgKs8zgjms9OpgDUee2EWtIVmKdzCE/feOiM6iFUM
+user1 $argon2id$v=19$m=1048576,t=4,p=1$LTXcMIc0DoNtIPYjhbLctQ$tTkZWU78dYYBpXJjW9CHgHloIi8CThrXpPUyLZLGBmc
+user2 $argon2id$v=19$m=1048576,t=4,p=1$5zmmcTOm3Y6NpH6NZ/dX3g$JHK9OSCA8WwXF3chOtLXYFxB7zn/cR8KrqpzfPygY8E

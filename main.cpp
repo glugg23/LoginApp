@@ -24,7 +24,8 @@ int main() {
         std::cout << "Enter your password: ";
         std::cin >> password;
 
-        char hashed_password[crypto_pwhash_STRBYTES];
+        //Commented out way of how to hash password, to use at later date
+        /*char hashed_password[crypto_pwhash_STRBYTES];
 
         if (crypto_pwhash_str
                 (hashed_password, password.c_str(), password.length(),
@@ -33,8 +34,11 @@ int main() {
             return 1;
         }
 
+        //Print hash for debugging reasons
+        std::cout << hashed_password << std::endl;*/
+
         user.setUsername(username);
-        user.setPassword(hashed_password);
+        user.setPassword(password);
 
         //Read file line by line
         for(std::string line; std::getline(inputFile, line);) {
@@ -47,8 +51,9 @@ int main() {
             }
 
             //If the username and password match, login user and end loop
-            if(user.verifyUser(User(fileUsername, const_cast<char*>(filePassword.c_str())))) {
+            if(user.verifyUser(User(fileUsername, filePassword))) {
                 user.toggleLoggedIn();
+                std::cout << "You have successfully logged in" << std::endl;
                 break;
             }
         }

@@ -5,21 +5,21 @@
 class User {
 private:
     std::string username;
-    char *password = nullptr;
+    std::string password;
     bool loggedIn = false;
 
 public:
     User() = default;
 
-    User(const std::string &username, char *password);
+    User(const std::string &username, const std::string &password);
 
     const std::string &getUsername() const;
 
     void setUsername(const std::string &username);
 
-    char* getPassword() const;
+    std::string getPassword() const;
 
-    void setPassword(char *password);
+    void setPassword(std::string password);
 
     bool isLoggedIn() const;
 

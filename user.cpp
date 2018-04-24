@@ -2,7 +2,7 @@
 
 #include <sodium.h>
 
-User::User(const std::string &username, char *password) : username(username), password(password) {}
+User::User(const std::string &username, const std::string &password) : username(username), password(password) {}
 
 const std::string &User::getUsername() const {
     return username;
@@ -12,12 +12,12 @@ void User::setUsername(const std::string &username) {
     User::username = username;
 }
 
-char *User::getPassword() const {
+std::string User::getPassword() const {
     return password;
 }
 
-void User::setPassword(char *password) {
-    User::password = password;
+void User::setPassword(std::string password) {
+    User::password = std::move(password);
 }
 
 bool User::isLoggedIn() const {
@@ -30,12 +30,8 @@ void User::toggleLoggedIn() {
 
 bool User::verifyUser(const User &userFromFile) {
     if(username == userFromFile.getUsername()) {
-        if((crypto_pwhash_str_verify(password, userFromFile.getPassword(), strlen(userFromFile.getPassword()))) == 0) {
-            return true;
-
-        } else {
-            return false;
-        }
+        return crypto_pwhash_str_verify(userFromFile.getPassword().c_str(),
+               password.c_str(), password.length()) == 0;
 
     } else {
         return false;
