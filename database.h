@@ -12,3 +12,5 @@
 #include "user.h"
 
 void makeNewUser(User &user, mongocxx::collection &collection);
+
+void changePassword(User &user, mongocxx::collection &collection);

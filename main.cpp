@@ -33,11 +33,12 @@ int main() {
     mongocxx::collection collection = db["users"];
 
     if (sodium_init() == -1) {
-        std::cerr << "ERROR: Encryption library could not be initialized" << std::endl;
+        std::cerr << "ERROR: Encryption library could not be initialized." << std::endl;
         return 1;
     }
 
     User user;
+    int count = 0;
 
     do {
         std::string username, password;
@@ -70,12 +71,27 @@ int main() {
                 std::cout << "You have successfully logged in!" << std::endl;
 
             } else {
-                std::cerr << "Wrong password" << std::endl;
-                //Maybe add option here to change password?
+                std::cout << "Incorrect password." << std::endl;
+                ++count;
+
+                if(count >= 3) {
+                    char input;
+                    do {
+                        std::cout << "Would you like to change your password? (y/n): ";
+                        std::cin >> input;
+
+                        if(input == 'y' || input == 'Y') {
+                            changePassword(user, collection);
+                            count = 0;
+                            break;
+                        }
+
+                    } while(!(input == 'n' || input == 'N'));
+                }
             }
 
         } else {
-            std::cerr << "Wrong username" << std::endl;
+            std::cout << "This user does not exist." << std::endl;
             char input;
             do {
                 std::cout << "Would you like to create a new user? (y/n): ";
