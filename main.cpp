@@ -55,14 +55,12 @@ int main() {
         password.clear();
 
         //Find if document matching username exists
-        core::optional<bsoncxx::document::value> maybe_doc
+        core::optional<bsoncxx::document::value> maybeDoc
             = collection.find_one(make_document(kvp("user", user.getUsername())));
 
-        if(maybe_doc) {
-            //View document
-            bsoncxx::document::view view = maybe_doc->view();
+        if(maybeDoc) {
             //Get element in password row
-            bsoncxx::document::element element = view["password"];
+            bsoncxx::document::element element = maybeDoc->view()["password"];
 
             //Check whether the hash matches the given password
             if(crypto_pwhash_str_verify(element.get_utf8().value.to_string().c_str(),
@@ -99,8 +97,6 @@ int main() {
 
                 if(input == 'y' || input == 'Y') {
                     makeNewUser(user, collection);
-                    user.toggleLoggedIn();
-                    std::cout << "You have successfully logged in!" << std::endl;
                     break;
                 }
 

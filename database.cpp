@@ -28,24 +28,22 @@ void makeNewUser(User &user, mongocxx::collection &collection) {
     password1.clear();
     password2.clear();
 
-    char hashed_password[crypto_pwhash_STRBYTES];
+    char hashedPassword[crypto_pwhash_STRBYTES];
 
     if(crypto_pwhash_str
-            (hashed_password, user.getPassword().c_str(), user.getPassword().length(),
+            (hashedPassword, user.getPassword().c_str(), user.getPassword().length(),
              crypto_pwhash_OPSLIMIT_SENSITIVE, crypto_pwhash_MEMLIMIT_SENSITIVE) != 0) {
         std::cerr << "ERROR: Out of memory for hash." << std::endl;
         return;
     }
 
-    bsoncxx::builder::basic::document basic_builder{};
-    basic_builder.append(kvp("user", user.getUsername()));
-    basic_builder.append(kvp("password", hashed_password));
-    bsoncxx::document::value document = basic_builder.extract();
-    bsoncxx::document::view view = document.view();
-    bsoncxx::stdx::optional<mongocxx::result::insert_one> result = collection.insert_one(view);
+    bsoncxx::stdx::optional<mongocxx::result::insert_one> result =
+        collection.insert_one(make_document(kvp("user", user.getUsername()), kvp("password", hashedPassword)));
 
     if(result) {
         std::cout << "Your account was created!" << std::endl;
+        user.toggleLoggedIn();
+        std::cout << "You have successfully logged in!" << std::endl;
 
     } else {
         std::cerr << "ERROR: Something unexpected happened." << std::endl;
@@ -66,10 +64,10 @@ std::string randomString() {
 void changePassword(User &user, mongocxx::collection &collection) {
     user.setPassword(randomString());
 
-    char hashed_password[crypto_pwhash_STRBYTES];
+    char hashedPassword[crypto_pwhash_STRBYTES];
 
     if(crypto_pwhash_str
-           (hashed_password, user.getPassword().c_str(), user.getPassword().length(),
+           (hashedPassword, user.getPassword().c_str(), user.getPassword().length(),
             crypto_pwhash_OPSLIMIT_SENSITIVE, crypto_pwhash_MEMLIMIT_SENSITIVE) != 0) {
         std::cerr << "ERROR: Out of memory for hash." << std::endl;
         return;
@@ -77,8 +75,8 @@ void changePassword(User &user, mongocxx::collection &collection) {
 
     collection.update_one(
         make_document(kvp("user", user.getUsername())),
-        make_document(kvp("$set", make_document(kvp("password", hashed_password), kvp("resetPassword", true))))
-        );
+        make_document(kvp("$set", make_document(kvp("password", hashedPassword), kvp("resetPassword", true))))
+    );
 
     std::cout << "Your password was reset.\n"
               << "Your new password is " << user.getPassword() << '\n'
