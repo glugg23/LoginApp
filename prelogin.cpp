@@ -1,38 +1,19 @@
-#include "database.h"
+#include "prelogin.h"
 
 #include <iostream>
 #include <random>
+
+#include <sodium.h>
 
 using bsoncxx::builder::basic::kvp;
 using bsoncxx::builder::basic::make_document;
 
 void makeNewUser(User &user, mongocxx::collection &collection) {
-    std::string password1;
-    std::string password2;
-
-    do {
-        std::cout << "Enter your password: ";
-        std::cin >> password1;
-
-        std::cout << "Enter your password a second time: ";
-        std::cin >> password2;
-
-        if(password1 != password2) {
-            std::cout << "Your passwords didn't match, please try again." << std::endl;
-        }
-
-    } while(password1 != password2);
-
-    user.setPassword(password1);
-
-    password1.clear();
-    password2.clear();
-
     char hashedPassword[crypto_pwhash_STRBYTES];
 
     if(crypto_pwhash_str
             (hashedPassword, user.getPassword().c_str(), user.getPassword().length(),
-             crypto_pwhash_OPSLIMIT_SENSITIVE, crypto_pwhash_MEMLIMIT_SENSITIVE) != 0) {
+             crypto_pwhash_OPSLIMIT_MIN, crypto_pwhash_MEMLIMIT_MIN) != 0) {
         std::cerr << "ERROR: Out of memory for hash." << std::endl;
         return;
     }
@@ -61,7 +42,7 @@ std::string randomString() {
     return str.substr(0, 12);
 }
 
-void changePassword(User &user, mongocxx::collection &collection) {
+void changePasswordPreLogin(User &user, mongocxx::collection &collection) {
     user.setPassword(randomString());
 
     char hashedPassword[crypto_pwhash_STRBYTES];

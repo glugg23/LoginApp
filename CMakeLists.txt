@@ -7,7 +7,7 @@ include(Findsodium.cmake)
 find_package(libmongocxx REQUIRED)
 find_package(libbsoncxx REQUIRED)
 
-add_executable(LoginApp main.cpp user.cpp user.h PRIVATE.h database.cpp database.h)
+add_executable(LoginApp PRIVATE.h main.cpp user.cpp user.h prelogin.cpp prelogin.h menu.cpp menu.h)
 
 find_package(libmongocxx REQUIRED)
 find_package(libbsoncxx REQUIRED)
