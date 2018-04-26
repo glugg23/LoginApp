@@ -46,7 +46,7 @@ int main() {
 
         //Find if document matching username exists
         core::optional<bsoncxx::document::value> maybeDoc
-            = collection.find_one(make_document(kvp("user", user.getUsername())));
+            = collection.find_one(make_document(kvp("username", user.getUsername())));
 
         if(maybeDoc) {
             //Get element in password row

@@ -19,7 +19,7 @@ void makeNewUser(User &user, mongocxx::collection &collection) {
     }
 
     bsoncxx::stdx::optional<mongocxx::result::insert_one> result =
-        collection.insert_one(make_document(kvp("user", user.getUsername()), kvp("password", hashedPassword)));
+        collection.insert_one(make_document(kvp("username", user.getUsername()), kvp("password", hashedPassword)));
 
     if(result) {
         std::cout << "Your account was created!" << std::endl;
@@ -55,7 +55,7 @@ void changePasswordPreLogin(User &user, mongocxx::collection &collection) {
     }
 
     collection.update_one(
-        make_document(kvp("user", user.getUsername())),
+        make_document(kvp("username", user.getUsername())),
         make_document(kvp("$set", make_document(kvp("password", hashedPassword), kvp("resetPassword", true))))
     );
 
