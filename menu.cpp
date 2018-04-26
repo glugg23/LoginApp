@@ -2,6 +2,8 @@
 
 #include <sodium.h>
 
+#include <bsoncxx/exception/exception.hpp>
+
 #include "menu.h"
 
 using bsoncxx::builder::basic::kvp;
@@ -75,17 +77,27 @@ void runMenu(User &user, mongocxx::collection &collection) {
 
     std::string choice;
 
-    core::optional<bsoncxx::document::value> maybeDoc
-        = collection.find_one(make_document(kvp("user", user.getUsername())));
+    try {
+        core::optional<bsoncxx::document::value> maybeDoc
+            = collection.find_one(make_document(kvp("user", user.getUsername())));
 
-    if(maybeDoc) {
-        bsoncxx::document::element element = maybeDoc->view()["resetPassword"];
+        if(maybeDoc) {
+            bsoncxx::document::element element = maybeDoc->view()["resetPassword"];
 
-        if(element.get_bool().value) {
-            std::cout << "You recently reset your password.\n"
-                      << "Please change your password.\n" << std::endl;
-            changePassword(user, collection);
+            //element can throw an exception if field resetPassword does not exist
+            if (element.get_bool().value) {
+                std::cout << "You recently reset your password.\n"
+                          << "Please change your password.\n" << std::endl;
+                changePassword(user, collection);
+            }
         }
+
+    } catch(bsoncxx::exception &e) {
+        //If this exception is thrown update document to include this field
+        collection.update_one(
+            make_document(kvp("user", user.getUsername())),
+            make_document(kvp("$set", make_document(kvp("resetPassword", false))))
+        );
     }
 
     do {
