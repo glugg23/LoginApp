@@ -12,6 +12,7 @@ using bsoncxx::builder::basic::make_document;
 void printHelp() {
     std::cout << "help: displays this help menu." << std::endl;
     std::cout << "changepw: allows you to change your password." << std::endl;
+    std::cout << "deleteUser: deletes your account." << std::endl;
     std::cout << "exit: logs you out." << std::endl;
 }
 
@@ -52,7 +53,29 @@ void changePassword(User &user, mongocxx::collection &collection) {
     );
 }
 
-void menuChoice(const std::string &choice, User &user, mongocxx::collection &collection) {
+std::string deleteUser(User &user, mongocxx::collection &collection) {
+    std::string password1;
+    std::string password2;
+
+    std::cout << "Enter your password to delete your account: ";
+    std::cin >> password1;
+
+    std::cout << "Enter your password a second time: ";
+    std::cin >> password2;
+
+    if(password1 != password2 || password1 != user.getPassword() || password2 != user.getPassword()) {
+        std::cout << "Your passwords didn't match.\n"
+                  << "Aborting delete attempt." << std::endl;
+        return "";
+    }
+
+    collection.delete_one(make_document(kvp("user", user.getUsername())));
+    std::cout << "User deleted, goodbye!" << std::endl;
+
+    return "exit";
+}
+
+void menuChoice(std::string &choice, User &user, mongocxx::collection &collection) {
     if(choice == "help") {
         printHelp();
         return;
@@ -64,6 +87,11 @@ void menuChoice(const std::string &choice, User &user, mongocxx::collection &col
 
     if(choice == "changepw") {
         changePassword(user, collection);
+        return;
+    }
+
+    if(choice == "deleteUser") {
+        choice = deleteUser(user, collection);
         return;
     }
 
