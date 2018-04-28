@@ -22,7 +22,7 @@ int main() {
     mongocxx::database db = client["users_test"];
     mongocxx::collection collection = db["users"];
 
-    if (sodium_init() == -1) {
+    if(sodium_init() == -1) {
         std::cerr << "ERROR: Encryption library could not be initialized." << std::endl;
         return 1;
     }

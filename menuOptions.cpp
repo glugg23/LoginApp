@@ -102,4 +102,11 @@ void showInfo(User &user, mongocxx::collection &collection) {
 
     std::time_t time = std::chrono::duration_cast<std::chrono::seconds>(element.get_date().value).count();
     std::cout << "You last logged in on " << std::ctime(&time);
+
+    element = document->view()["_id"];
+
+    time = element.get_oid().value.get_time_t();
+    std::cout << "You created this account on " << std::ctime(&time);
+
+    std::cout << '\n';
 }
