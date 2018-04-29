@@ -65,23 +65,15 @@ void runMenu(User &user, mongocxx::collection &collection) {
         );
     }
 
-    try {
-        //Increase login counter
-        bsoncxx::document::element element = document->view()["loginCount"];
+    //Increase login counter
+    bsoncxx::document::element element = document->view()["loginCount"];
 
-        int count = element.get_int32();
+    int count = element.get_int32();
 
-        collection.update_one(
-            make_document(kvp("username", user.getUsername())),
-            make_document(kvp("$set", make_document(kvp("loginCount", ++count))))
-        );
-
-    } catch(bsoncxx::exception &e) {
-        collection.update_one(
-            make_document(kvp("username", user.getUsername())),
-            make_document(kvp("$set", make_document(kvp("loginCount", 1))))
-        );
-    }
+    collection.update_one(
+        make_document(kvp("username", user.getUsername())),
+        make_document(kvp("$set", make_document(kvp("loginCount", ++count))))
+    );
 
     do {
         std::cout << user.getUsername() << ": ";

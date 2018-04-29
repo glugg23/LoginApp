@@ -19,8 +19,12 @@ void makeNewUser(User &user, mongocxx::collection &collection) {
     }
 
     bsoncxx::stdx::optional<mongocxx::result::insert_one> result =
-        collection.insert_one(make_document(kvp("username", user.getUsername()), kvp("password", hashedPassword),
-                              kvp("lastLogin", bsoncxx::types::b_date(std::chrono::system_clock::now()))));
+        collection.insert_one(make_document(kvp("username", user.getUsername()),
+                                            kvp("password", hashedPassword),
+                                            kvp("role", "user"),
+                                            kvp("lastLogin", bsoncxx::types::b_date(std::chrono::system_clock::now())),
+                                            kvp("loginCount", 0))
+        );
 
     if(result) {
         std::cout << "Your account was created!" << std::endl;
