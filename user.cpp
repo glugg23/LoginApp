@@ -1,7 +1,5 @@
 #include "user.h"
 
-#include <sodium.h>
-
 User::User(const std::string &username, const std::string &password) : username(username), password(password) {}
 
 const std::string &User::getUsername() const {

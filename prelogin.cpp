@@ -1,44 +1,30 @@
-#include "database.h"
+#include "prelogin.h"
 
 #include <iostream>
 #include <random>
+
+#include <sodium.h>
 
 using bsoncxx::builder::basic::kvp;
 using bsoncxx::builder::basic::make_document;
 
 void makeNewUser(User &user, mongocxx::collection &collection) {
-    std::string password1;
-    std::string password2;
-
-    do {
-        std::cout << "Enter your password: ";
-        std::cin >> password1;
-
-        std::cout << "Enter your password a second time: ";
-        std::cin >> password2;
-
-        if(password1 != password2) {
-            std::cout << "Your passwords didn't match, please try again." << std::endl;
-        }
-
-    } while(password1 != password2);
-
-    user.setPassword(password1);
-
-    password1.clear();
-    password2.clear();
-
     char hashedPassword[crypto_pwhash_STRBYTES];
 
     if(crypto_pwhash_str
             (hashedPassword, user.getPassword().c_str(), user.getPassword().length(),
-             crypto_pwhash_OPSLIMIT_SENSITIVE, crypto_pwhash_MEMLIMIT_SENSITIVE) != 0) {
+             crypto_pwhash_OPSLIMIT_MIN, crypto_pwhash_MEMLIMIT_MIN) != 0) {
         std::cerr << "ERROR: Out of memory for hash." << std::endl;
         return;
     }
 
     bsoncxx::stdx::optional<mongocxx::result::insert_one> result =
-        collection.insert_one(make_document(kvp("user", user.getUsername()), kvp("password", hashedPassword)));
+        collection.insert_one(make_document(kvp("username", user.getUsername()),
+                                            kvp("password", hashedPassword),
+                                            kvp("role", "user"),
+                                            kvp("lastLogin", bsoncxx::types::b_date(std::chrono::system_clock::now())),
+                                            kvp("loginCount", 0))
+        );
 
     if(result) {
         std::cout << "Your account was created!" << std::endl;
@@ -61,7 +47,7 @@ std::string randomString() {
     return str.substr(0, 12);
 }
 
-void changePassword(User &user, mongocxx::collection &collection) {
+void changePasswordPreLogin(User &user, mongocxx::collection &collection) {
     user.setPassword(randomString());
 
     char hashedPassword[crypto_pwhash_STRBYTES];
@@ -74,7 +60,7 @@ void changePassword(User &user, mongocxx::collection &collection) {
     }
 
     collection.update_one(
-        make_document(kvp("user", user.getUsername())),
+        make_document(kvp("username", user.getUsername())),
         make_document(kvp("$set", make_document(kvp("password", hashedPassword), kvp("resetPassword", true))))
     );
 

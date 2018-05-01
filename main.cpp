@@ -1,8 +1,4 @@
 #include <iostream>
-#include <fstream>
-#include <sstream>
-#include <cstdint>
-#include <vector>
 
 #include <sodium.h>
 
@@ -11,18 +7,12 @@
 #include <mongocxx/instance.hpp>
 #include <mongocxx/uri.hpp>
 #include <mongocxx/stdx.hpp>
-#include <bsoncxx/builder/stream/document.hpp>
 
 #include "PRIVATE.h"
 #include "user.h"
-#include "database.h"
+#include "prelogin.h"
+#include "menu.h"
 
-using bsoncxx::builder::stream::close_array;
-using bsoncxx::builder::stream::close_document;
-using bsoncxx::builder::stream::document;
-using bsoncxx::builder::stream::finalize;
-using bsoncxx::builder::stream::open_array;
-using bsoncxx::builder::stream::open_document;
 using bsoncxx::builder::basic::kvp;
 using bsoncxx::builder::basic::make_document;
 
@@ -32,7 +22,7 @@ int main() {
     mongocxx::database db = client["users_test"];
     mongocxx::collection collection = db["users"];
 
-    if (sodium_init() == -1) {
+    if(sodium_init() == -1) {
         std::cerr << "ERROR: Encryption library could not be initialized." << std::endl;
         return 1;
     }
@@ -56,7 +46,7 @@ int main() {
 
         //Find if document matching username exists
         core::optional<bsoncxx::document::value> maybeDoc
-            = collection.find_one(make_document(kvp("user", user.getUsername())));
+            = collection.find_one(make_document(kvp("username", user.getUsername())));
 
         if(maybeDoc) {
             //Get element in password row
@@ -79,7 +69,7 @@ int main() {
                         std::cin >> input;
 
                         if(input == 'y' || input == 'Y') {
-                            changePassword(user, collection);
+                            changePasswordPreLogin(user, collection);
                             count = 0;
                             break;
                         }
@@ -104,6 +94,11 @@ int main() {
         }
 
     } while(!user.isLoggedIn());
+
+    //Redundant if statement for security reasons
+    if(user.isLoggedIn()) {
+        runMenu(user, collection);
+    }
 
     return 0;
 }
